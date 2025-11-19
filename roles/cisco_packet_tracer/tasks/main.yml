@@ -1,0 +1,70 @@
+---
+
+# 1. Check if Packet Tracer is already installed
+- name: Check if PacketTracer.exe exists
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\Cisco Packet Tracer 6.2\\bin\\PacketTracer.exe"
+  register: pt_installed
+
+# 2. Skip installation if already installed
+- name: Skip installation if Packet Tracer already installed
+  debug:
+    msg: "Packet Tracer already installed — skipping..."
+  when: pt_installed.stat.exists
+  tags: skip
+
+# 3. Kill existing stuck installation processes
+- name: Kill stuck Packet Tracer installer processes
+  ansible.windows.win_shell: |
+    Get-Process -Name PacketTracer62_setup -ErrorAction SilentlyContinue | Stop-Process -Force
+  ignore_errors: yes
+  when: not pt_installed.stat.exists
+
+# 4. Ensure C:\Installers exists
+- name: Ensure installer directory exists
+  ansible.windows.win_file:
+    path: C:\Installers
+    state: directory
+  when: not pt_installed.stat.exists
+
+# 5. Copy installer EXE from role's files/
+- name: Copy Packet Tracer installer
+  ansible.windows.win_copy:
+    src: PacketTracer62_setup.exe
+    dest: C:\Installers\PacketTracer62_setup.exe
+    force: yes
+  when: not pt_installed.stat.exists
+
+# 6. Delete old log file
+- name: Remove old installation log
+  ansible.windows.win_file:
+    path: C:\Installers\pt_install_test.log
+    state: absent
+  when: not pt_installed.stat.exists
+
+# 7. Run installer silently
+- name: Install Packet Tracer silently
+  ansible.windows.win_command: >
+    C:\Installers\PacketTracer62_setup.exe /VERYSILENT /NORESTART /LOG="C:\Installers\pt_install_test.log"
+  when: not pt_installed.stat.exists
+
+# 8. Verify installation success
+- name: Verify installation log for success
+  ansible.windows.win_shell: |
+    Select-String -Path "C:\Installers\pt_install_test.log" -Pattern "Installation process succeeded" | Measure-Object | % { $_.Count }
+  register: install_success
+  when: not pt_installed.stat.exists
+
+# 9. If installation failed → stop playbook
+- name: Fail if Packet Tracer did not install
+  ansible.builtin.fail:
+    msg: "Packet Tracer installation failed! Check log file."
+  when:
+    - not pt_installed.stat.exists
+    - install_success.stdout|int == 0
+
+# 10. Installation success message
+- name: Success message
+  debug:
+    msg: "Packet Tracer installed successfully!"
+  when: not pt_installed.stat.exists
