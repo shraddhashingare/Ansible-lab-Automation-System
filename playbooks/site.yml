@@ -1,8 +1,0 @@
----
-
-- name: Deploy all required software to Windows lab PCs
-  hosts: all
-  gather_facts: no
-
-  roles:
-    - cisco_packet_tracer
