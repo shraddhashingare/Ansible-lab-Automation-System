@@ -1,0 +1,49 @@
+---
+- name: Install Notepad++
+  hosts: all
+  gather_facts: no
+
+  vars:
+    exe_src: "/mnt/c/Ansible/installers/npp.8.8.8.Installer.x64.exe"
+    exe_dest: "C:\\Ansible\\Installers\\npp_installer.exe"
+    exe_install_path: "C:\\Program Files\\Notepad++\\notepad++.exe"
+
+  tasks:
+
+    - name: Check Notepad++ install
+      win_stat:
+        path: "{{ exe_install_path }}"
+      register: np_stat
+
+    - debug:
+        msg: "Notepad++ already installed — skipping"
+      when: np_stat.stat.exists
+
+    - name: Ensure folder exists
+      win_file:
+        path: "C:\\Ansible\\Installers"
+        state: directory
+      when: not np_stat.stat.exists
+
+    - name: Check if installer exists
+      win_stat:
+        path: "{{ exe_dest }}"
+      register: np_installer_present
+      when: not np_stat.stat.exists
+
+    - name: Copy installer
+      win_copy:
+        src: "{{ exe_src }}"
+        dest: "{{ exe_dest }}"
+      when:
+        - not np_stat.stat.exists
+        - not np_installer_present.stat.exists
+
+    - name: Run silent install
+      win_command: '"{{ exe_dest }}" /S'
+      when: not np_stat.stat.exists
+
+    - name: Success message
+      debug:
+        msg: "Notepad++ installed successfully!"
+      when: not np_stat.stat.exists

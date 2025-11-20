@@ -1,0 +1,7 @@
+---
+- name: Install StarUML on Windows PCs
+  hosts: all
+  gather_facts: no
+
+  roles:
+    - staruml

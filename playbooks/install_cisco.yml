@@ -1,0 +1,7 @@
+---
+- name: Install Cisco Packet Tracer on Windows PCs
+  hosts: all
+  gather_facts: no
+
+  roles:
+    - cisco_packet_tracer

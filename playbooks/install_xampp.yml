@@ -1,0 +1,7 @@
+---
+- name: Install XAMPP on Windows PCs
+  hosts: all
+  gather_facts: no
+
+  roles:
+    - xampp

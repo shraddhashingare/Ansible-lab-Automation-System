@@ -1,0 +1,43 @@
+---
+- name: Install StarUML
+  hosts: all
+  gather_facts: no
+
+  vars:
+    src: "/mnt/c/Ansible/installers/StarUML Setup 7.0.0.exe"
+    dest: "C:\\Ansible\\Installers\\StarUML_Setup.exe"
+    path: "C:\\Program Files\\StarUML\\StarUML.exe"
+
+  tasks:
+
+    - name: Check StarUML installed
+      win_stat:
+        path: "{{ path }}"
+      register: su_stat
+
+    - debug:
+        msg: "StarUML already installed — skipping"
+      when: su_stat.stat.exists
+
+    - name: Ensure folder exists
+      win_file:
+        path: "C:\\Ansible\\Installers"
+        state: directory
+      when: not su_stat.stat.exists
+
+    - name: Check installer exists
+      win_stat:
+        path: "{{ dest }}"
+      register: su_installer
+
+    - name: Copy installer
+      win_copy:
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+      when:
+        - not su_stat.stat.exists
+        - not su_installer.stat.exists
+
+    - name: Install silently
+      win_command: '"{{ dest }}" /silent'
+      when: not su_stat.stat.exists

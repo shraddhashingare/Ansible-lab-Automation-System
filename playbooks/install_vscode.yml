@@ -1,0 +1,7 @@
+---
+- name: Install VSCode on Windows PCs
+  hosts: all
+  gather_facts: no
+
+  roles:
+    - vscode
