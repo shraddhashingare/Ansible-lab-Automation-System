@@ -1,0 +1,4 @@
+src: "/mnt/c/Ansible/installers/StarUML Setup 7.0.0.exe"
+dest: "C:\\Ansible\\Installers\\StarUML_Setup.exe"
+path: "C:\\Program Files\\StarUML\\StarUML.exe"
+installer_folder: "C:\\Ansible\\Installers"

@@ -1,5 +1,5 @@
 ---
-- name: Install StarUML on Windows PCs
+- name: Install StarUML on Windows
   hosts: all
   gather_facts: no
 
