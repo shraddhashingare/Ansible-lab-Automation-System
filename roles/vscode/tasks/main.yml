@@ -1,44 +1,34 @@
+# File path: roles/vscode/tasks/main.yml
 ---
-- name: Install VS Code
-  hosts: all
-  gather_facts: no
+- name: Check VS Code installed
+  win_stat:
+    path: "{{ exe_path }}"
+  register: code_installed
 
-  vars:
-    src: "/mnt/c/Ansible/installers/VSCodeUserSetup-x64-1.106.2.exe"
-    dest: "C:\\Ansible\\Installers\\vscode.exe"
-    exe_path: "C:\\Users\\{{ ansible_user }}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+- debug:
+    msg: "VS Code already installed — skipping"
+  when: code_installed.stat.exists
 
-  tasks:
+- name: Ensure installer directory exists
+  win_file:
+    path: "C:\\Ansible\\Installers"
+    state: directory
+  when: not code_installed.stat.exists
 
-    - name: Check VS Code installed
-      win_stat:
-        path: "{{ exe_path }}"
-      register: code_installed
+- name: Check installer exists
+  win_stat:
+    path: "{{ dest }}"
+  register: vs_installer
+  when: not code_installed.stat.exists
 
-    - debug:
-        msg: "VS Code already installed — skipping"
-      when: code_installed.stat.exists
+- name: Copy installer
+  win_copy:
+    src: "{{ src }}"
+    dest: "{{ dest }}"
+  when:
+    - not code_installed.stat.exists
+    - not vs_installer.stat.exists
 
-    - name: Ensure folder exists
-      win_file:
-        path: "C:\\Ansible\\Installers"
-        state: directory
-      when: not code_installed.stat.exists
-
-    - name: Check installer exists
-      win_stat:
-        path: "{{ dest }}"
-      register: vs_installer
-      when: not code_installed.stat.exists
-
-    - name: Copy installer
-      win_copy:
-        src: "{{ src }}"
-        dest: "{{ dest }}"
-      when:
-        - not code_installed.stat.exists
-        - not vs_installer.stat.exists
-
-    - name: Install silently
-      win_command: '"{{ dest }}" /VERYSILENT /MERGETASKS=!runCode'
-      when: not code_installed.stat.exists
+- name: Install silently
+  win_command: '"{{ dest }}" /VERYSILENT /MERGETASKS=!runCode'
+  when: not code_installed.stat.exists
