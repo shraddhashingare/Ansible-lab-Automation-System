@@ -1,5 +1,5 @@
-installer_url: "https://staruml.io/api/download/releases-v7/StarUML%20Setup%207.0.0.exe"
+installer_url: "https://github.com/shraddhashingare/Ansible-lab-Automation-System/releases/download/v1/StarUML_Setup.exe"
 installer_dest: "C:\\Ansible\\Installers\\StarUML_Setup.exe"
-installer_folder: "C:\\Ansible\\Installers"
 staruml_install_path: "C:\\Program Files\\StarUML\\StarUML.exe"
+installer_folder: "C:\\Ansible\\Installers"
 
