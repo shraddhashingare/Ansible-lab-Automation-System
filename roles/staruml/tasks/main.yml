@@ -21,9 +21,9 @@
   register: su_installer
   when: not su_stat.stat.exists
 
-- name: Copy installer from AWX project to target PC
-  win_copy:
-    src: "{{ installer_src }}"
+- name: Download installer directly from URL
+  win_get_url:
+    url: "{{ installer_url }}"
     dest: "{{ installer_dest }}"
   when:
     - not su_stat.stat.exists
