@@ -1,33 +1,21 @@
 ---
+
 - name: Check if StarUML is installed
   win_stat:
     path: "{{ staruml_install_path }}"
   register: su_stat
 
-- name: StarUML already installed — skipping
-  debug:
-    msg: "StarUML already installed — skipping"
-  when: su_stat.stat.exists
-
-- name: Ensure installer folder exists on target PC
+- name: Ensure installer folder exists
   win_file:
     path: "{{ installer_folder }}"
     state: directory
   when: not su_stat.stat.exists
 
-- name: Check if installer already exists on target PC
-  win_stat:
-    path: "{{ installer_dest }}"
-  register: su_installer
-  when: not su_stat.stat.exists
-
-- name: Download installer directly from URL
+- name: Download StarUML from GitHub Releases CDN
   win_get_url:
     url: "{{ installer_url }}"
     dest: "{{ installer_dest }}"
-  when:
-    - not su_stat.stat.exists
-    - not su_installer.stat.exists
+  when: not su_stat.stat.exists
 
 - name: Install StarUML silently
   win_command: '"{{ installer_dest }}" /VERYSILENT'
