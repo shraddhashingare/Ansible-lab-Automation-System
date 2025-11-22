@@ -1,3 +1,4 @@
+---
 - name: Check if StarUML is installed
   win_stat:
     path: "{{ staruml_install_path }}"
@@ -20,9 +21,10 @@
   register: su_installer
   when: not su_stat.stat.exists
 
-- name: Copy installer from AWX project to target PC
-  win_copy:
-    src: "{{ installer_src }}"
+# ✅ NEW – Installer downloaded from internet, not from AWX
+- name: Download StarUML installer from internet
+  win_get_url:
+    url: "{{ installer_url }}"
     dest: "{{ installer_dest }}"
   when:
     - not su_stat.stat.exists
