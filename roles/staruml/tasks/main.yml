@@ -1,32 +1,27 @@
 ---
-# 1. Check if StarUML is already installed
 - name: Check if StarUML is installed
   win_stat:
     path: "{{ staruml_install_path }}"
   register: su_stat
 
-# 2. Skip when already installed
 - name: StarUML already installed — skipping
   debug:
     msg: "StarUML already installed — skipping"
   when: su_stat.stat.exists
 
-# 3. Ensure installer folder exists on target PC
 - name: Ensure installer folder exists on target PC
   win_file:
     path: "{{ installer_folder }}"
     state: directory
   when: not su_stat.stat.exists
 
-# 4. Check if installer already exists on target PC
 - name: Check if installer already exists on target PC
   win_stat:
     path: "{{ installer_dest }}"
   register: su_installer
   when: not su_stat.stat.exists
 
-# 5. Copy installer from AWX controller (Linux) to Windows
-- name: Copy StarUML installer from AWX controller to Windows machine
+- name: Copy installer from AWX project to target PC
   win_copy:
     src: "{{ installer_src }}"
     dest: "{{ installer_dest }}"
@@ -34,7 +29,6 @@
     - not su_stat.stat.exists
     - not su_installer.stat.exists
 
-# 6. Install StarUML silently
 - name: Install StarUML silently
-  win_command: '"{{ installer_dest }}" /VERYSILENT /NORESTART'
+  win_command: '"{{ installer_dest }}" /VERYSILENT'
   when: not su_stat.stat.exists
