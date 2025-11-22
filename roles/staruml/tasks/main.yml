@@ -1,20 +1,28 @@
 ---
+<<<<<<< HEAD
 - name: Check if StarUML is installed
   win_stat:
     path: "{{ staruml_install_path }}"
   register: su_stat
+=======
+- name: Check if StarUML is already installed
+  win_stat:
+    path: "{{ app_path }}"
+  register: su_installed
+>>>>>>> 9a4f847 (Fix StarUML role with correct installer)
 
 - name: StarUML already installed — skipping
   debug:
-    msg: "StarUML already installed — skipping"
-  when: su_stat.stat.exists
+    msg: "StarUML already installed"
+  when: su_installed.stat.exists
 
 - name: Ensure installer folder exists on target PC
   win_file:
     path: "{{ installer_folder }}"
     state: directory
-  when: not su_stat.stat.exists
+  when: not su_installed.stat.exists
 
+<<<<<<< HEAD
 - name: Check if installer already exists on target PC
   win_stat:
     path: "{{ installer_dest }}"
@@ -22,13 +30,32 @@
   when: not su_stat.stat.exists
 
 - name: Copy installer from AWX project to target PC
+=======
+- name: Check if StarUML installer exists on host
+  win_stat:
+    path: "{{ installer_dest }}"
+  register: installer_file
+
+- name: Copy installer to Windows host
+>>>>>>> 9a4f847 (Fix StarUML role with correct installer)
   win_copy:
     src: "{{ installer_src }}"
     dest: "{{ installer_dest }}"
   when:
-    - not su_stat.stat.exists
-    - not su_installer.stat.exists
+    - not su_installed.stat.exists
+    - not installer_file.stat.exists
 
+<<<<<<< HEAD
 - name: Install StarUML silently
   win_command: '"{{ installer_dest }}" /silent'
   when: not su_stat.stat.exists
+=======
+- name: Run StarUML silent installer
+  win_command: '"{{ installer_dest }}" /silent'
+  when: not su_installed.stat.exists
+
+- name: Installation successful
+  debug:
+    msg: "StarUML installed successfully"
+  when: not su_installed.stat.exists
+>>>>>>> 9a4f847 (Fix StarUML role with correct installer)
