@@ -21,7 +21,7 @@
   register: su_installer
   when: not su_stat.stat.exists
 
-- name: Copy installer from AWX project to target PC
+- name: Copy installer from controller to target PC
   win_copy:
     src: "{{ installer_src }}"
     dest: "{{ installer_dest }}"
