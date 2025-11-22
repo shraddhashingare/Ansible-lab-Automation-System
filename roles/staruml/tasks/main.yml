@@ -1,32 +1,46 @@
-- name: Check StarUML installed
-  win_stat:
-    path: "{{ path }}"
-  register: su_stat
+---
+- name: Install StarUML on Windows PCs
+  hosts: all
+  gather_facts: no
 
-- name: StarUML already installed — skipping
-  debug:
-    msg: "StarUML already installed — skipping"
-  when: su_stat.stat.exists
+  vars:
+    src: "/mnt/c/Ansible/installers/StarUML_Setup_7.0.0.exe"
+    dest: "C:\\Ansible\\Installers\\StarUML_Setup_7.0.0.exe"
+    path: "C:\\Program Files\\StarUML\\StarUML.exe"
+    installer_folder: "C:\\Ansible\\Installers"
 
-- name: Ensure installer folder exists
-  win_file:
-    path: "{{ installer_folder }}"
-    state: directory
-  when: not su_stat.stat.exists
+  tasks:
 
-- name: Check installer file exists on Windows host
-  win_stat:
-    path: "{{ dest }}"
-  register: su_installer
+    - name: Check if StarUML is already installed
+      win_stat:
+        path: "{{ path }}"
+      register: su_stat
 
-- name: Copy installer from control node to Windows host
-  win_copy:
-    src: "{{ src }}"
-    dest: "{{ dest }}"
-  when:
-    - not su_stat.stat.exists
-    - not su_installer.stat.exists
+    - name: StarUML already installed — skipping
+      debug:
+        msg: "StarUML already installed — skipping"
+      when: su_stat.stat.exists
 
-- name: Install StarUML silently
-  win_command: '"{{ dest }}" /silent'
-  when: not su_stat.stat.exists
+    - name: Ensure installer folder exists on target PC
+      win_file:
+        path: "{{ installer_folder }}"
+        state: directory
+      when: not su_stat.stat.exists
+
+    - name: Check if installer already exists on target PC
+      win_stat:
+        path: "{{ dest }}"
+      register: su_installer
+      when: not su_stat.stat.exists
+
+    - name: Copy installer from control node to target PC
+      win_copy:
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+      when:
+        - not su_stat.stat.exists
+        - not su_installer.stat.exists
+
+    - name: Install StarUML silently
+      win_command: '"{{ dest }}" /silent'
+      when: not su_stat.stat.exists
