@@ -1,0 +1,7 @@
+---
+installer_url: "https://github.com/shraddhashingare/Ansible-lab-Automation-System/releases/download/v1.4/xampp-8.2.12-0-vs16-installer.exe"
+
+installer_folder: "C:\\Ansible\\Installers"
+installer_dest: "C:\\Ansible\\Installers\\xampp_installer.exe"
+
+xampp_exe_path: "C:\\xampp\\xampp-control.exe"

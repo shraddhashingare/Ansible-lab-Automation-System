@@ -1,43 +1,32 @@
 ---
-- name: Install XAMPP
-  hosts: all
-  gather_facts: no
+- name: Check if XAMPP is already installed
+  win_stat:
+    path: "{{ xampp_exe_path }}"
+  register: xampp_installed
 
-  vars:
-    src: "/mnt/c/Ansible/installers/xampp-windows-x64-8.2.12-0-VS16-installer.exe"
-    dest: "C:\\Ansible\\Installers\\xampp.exe"
-    xampp_path: "C:\\xampp\\xampp-control.exe"
+- name: XAMPP already installed — skipping
+  debug:
+    msg: "XAMPP already installed"
+  when: xampp_installed.stat.exists
 
-  tasks:
+- name: Ensure installers directory exists
+  win_file:
+    path: "{{ installer_folder }}"
+    state: directory
+  when: not xampp_installed.stat.exists
 
-    - name: Check XAMPP installed
-      win_stat:
-        path: "{{ xampp_path }}"
-      register: xampp_stat
+- name: Download XAMPP installer from GitHub Release
+  win_get_url:
+    url: "{{ installer_url }}"
+    dest: "{{ installer_dest }}"
+    force: true
+  when: not xampp_installed.stat.exists
 
-    - debug:
-        msg: "XAMPP already installed — skipping"
-      when: xampp_stat.stat.exists
+- name: Install XAMPP silently
+  win_command: '"{{ installer_dest }}" --mode unattended'
+  when: not xampp_installed.stat.exists
 
-    - name: Ensure folder exists
-      win_file:
-        path: "C:\\Ansible\\Installers"
-        state: directory
-      when: not xampp_stat.stat.exists
-
-    - name: Check installer exists
-      win_stat:
-        path: "{{ dest }}"
-      register: x_installer
-
-    - name: Copy installer
-      win_copy:
-        src: "{{ src }}"
-        dest: "{{ dest }}"
-      when:
-        - not xampp_stat.stat.exists
-        - not x_installer.stat.exists
-
-    - name: Install XAMPP silently
-      win_command: '"{{ dest }}" --mode unattended'
-      when: not xampp_stat.stat.exists
+- name: Installation completed
+  debug:
+    msg: "XAMPP installed successfully!"
+  when: not xampp_installed.stat.exists
