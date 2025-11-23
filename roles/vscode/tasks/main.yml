@@ -1,34 +1,32 @@
-# File path: roles/vscode/tasks/main.yml
 ---
-- name: Check VS Code installed
+- name: Check if VS Code is already installed
   win_stat:
-    path: "{{ exe_path }}"
+    path: "{{ app_exe_path }}"
   register: code_installed
 
-- debug:
-    msg: "VS Code already installed — skipping"
+- name: VS Code already installed — skipping
+  debug:
+    msg: "VS Code already installed"
   when: code_installed.stat.exists
 
 - name: Ensure installer directory exists
   win_file:
-    path: "C:\\Ansible\\Installers"
+    path: "{{ installer_folder }}"
     state: directory
   when: not code_installed.stat.exists
 
-- name: Check installer exists
-  win_stat:
-    path: "{{ dest }}"
-  register: vs_installer
+- name: Download VS Code installer from GitHub Release
+  win_get_url:
+    url: "{{ installer_url }}"
+    dest: "{{ installer_dest }}"
+    force: true
   when: not code_installed.stat.exists
 
-- name: Copy installer
-  win_copy:
-    src: "{{ src }}"
-    dest: "{{ dest }}"
-  when:
-    - not code_installed.stat.exists
-    - not vs_installer.stat.exists
+- name: Install VS Code silently
+  win_command: '"{{ installer_dest }}" /VERYSILENT /MERGETASKS=!runCode'
+  when: not code_installed.stat.exists
 
-- name: Install silently
-  win_command: '"{{ dest }}" /VERYSILENT /MERGETASKS=!runCode'
+- name: Installation successful
+  debug:
+    msg: "VS Code installed successfully!"
   when: not code_installed.stat.exists

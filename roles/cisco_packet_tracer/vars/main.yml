@@ -1,0 +1,7 @@
+---
+installer_url: "https://github.com/shraddhashingare/Ansible-lab-Automation-System/releases/download/v1.3/packettracer-6.2-setup.exe"
+
+installer_folder: "C:\\Ansible\\Installers"
+installer_dest: "C:\\Ansible\\Installers\\PacketTracer_setup.exe"
+
+app_exe_path: "C:\\Program Files\\Cisco Packet Tracer 6.2\\bin\\PacketTracer.exe"

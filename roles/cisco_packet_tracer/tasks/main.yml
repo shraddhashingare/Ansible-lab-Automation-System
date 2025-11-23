@@ -1,74 +1,32 @@
 ---
-- name: Install Cisco Packet Tracer
-  hosts: all
-  gather_facts: no
+- name: Check if Packet Tracer is already installed
+  win_stat:
+    path: "{{ app_exe_path }}"
+  register: pt_installed
 
-  vars:
-    installer_src: "/mnt/c/Ansible/installers/PacketTracer62_setup.exe"
-    installer_dest: "C:\\Ansible\\Installers\\PacketTracer62_setup.exe"
-    install_path: "C:\\Program Files\\Cisco Packet Tracer 6.2\\bin\\PacketTracer.exe"
-    log_file: "C:\\Ansible\\Installers\\pt_install_log.txt"
+- name: Packet Tracer already installed — skipping
+  debug:
+    msg: "Packet Tracer already installed"
+  when: pt_installed.stat.exists
 
-  tasks:
+- name: Ensure installer directory exists
+  win_file:
+    path: "{{ installer_folder }}"
+    state: directory
+  when: not pt_installed.stat.exists
 
-    - name: Check if Packet Tracer already installed
-      win_stat:
-        path: "{{ install_path }}"
-      register: pt_installed
+- name: Download Packet Tracer installer from GitHub Release
+  win_get_url:
+    url: "{{ installer_url }}"
+    dest: "{{ installer_dest }}"
+    force: true
+  when: not pt_installed.stat.exists
 
-    - name: Skip installation
-      debug:
-        msg: "Packet Tracer already installed — skipping"
-      when: pt_installed.stat.exists
+- name: Install Packet Tracer silently
+  win_command: '"{{ installer_dest }}" /S'
+  when: not pt_installed.stat.exists
 
-    - name: Ensure destination folder exists
-      win_file:
-        path: "C:\\Ansible\\Installers"
-        state: directory
-      when: not pt_installed.stat.exists
-
-    - name: Check if installer already exists on target PC
-      win_stat:
-        path: "{{ installer_dest }}"
-      register: installer_present
-      when: not pt_installed.stat.exists
-
-    - name: Copy installer to target
-      win_copy:
-        src: "{{ installer_src }}"
-        dest: "{{ installer_dest }}"
-      when:
-        - not pt_installed.stat.exists
-        - not installer_present.stat.exists
-
-    - name: Remove old log file
-      win_file:
-        path: "{{ log_file }}"
-        state: absent
-      when: not pt_installed.stat.exists
-
-    - name: Run silent installer
-      win_command: >
-        "{{ installer_dest }}" /VERYSILENT /NORESTART /LOG="{{ log_file }}"
-      async: 1800
-      poll: 5
-      when: not pt_installed.stat.exists
-
-    - name: Check install success in log
-      win_shell: |
-        Select-String -Path "{{ log_file }}" -Pattern "Installation process succeeded" |
-        Measure-Object | % { $_.Count }
-      register: pt_success
-      when: not pt_installed.stat.exists
-
-    - name: Fail if installation failed
-      fail:
-        msg: "Packet Tracer install failed."
-      when:
-        - not pt_installed.stat.exists
-        - pt_success.stdout | int == 0
-
-    - name: Success message
-      debug:
-        msg: "Packet Tracer installed successfully!"
-      when: not pt_installed.stat.exists
+- name: Installation completed
+  debug:
+    msg: "Packet Tracer installed successfully!"
+  when: not pt_installed.stat.exists

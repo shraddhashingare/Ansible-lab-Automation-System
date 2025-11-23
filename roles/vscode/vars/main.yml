@@ -1,0 +1,5 @@
+---
+installer_url: "https://github.com/shraddhashingare/Ansible-lab-Automation-System/releases/download/v1.2/vscode-user-setup-x64-1.106.2.exe"
+installer_folder: "C:\\Ansible\\Installers"
+installer_dest: "C:\\Ansible\\Installers\\vscode_installer.exe"
+app_exe_path: "C:\\Users\\{{ ansible_user }}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"

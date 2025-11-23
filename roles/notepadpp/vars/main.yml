@@ -1,0 +1,5 @@
+---
+installer_url: "https://github.com/shraddhashingare/Ansible-lab-Automation-System/releases/download/v1.1/npp-8.8.8-installer-x64.exe"
+installer_folder: "C:\\Ansible\\Installers"
+installer_dest: "C:\\Ansible\\Installers\\npp_installer.exe"
+app_exe_path: "C:\\Program Files\\Notepad++\\notepad++.exe"
