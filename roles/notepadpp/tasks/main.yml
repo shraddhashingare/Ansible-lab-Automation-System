@@ -1,49 +1,32 @@
 ---
-- name: Install Notepad++
-  hosts: all
-  gather_facts: no
+- name: Check if Notepad++ is already installed
+  win_stat:
+    path: "{{ app_exe_path }}"
+  register: np_installed
 
-  vars:
-    exe_src: "/mnt/c/Ansible/installers/npp.8.8.8.Installer.x64.exe"
-    exe_dest: "C:\\Ansible\\Installers\\npp_installer.exe"
-    exe_install_path: "C:\\Program Files\\Notepad++\\notepad++.exe"
+- name: Notepad++ already installed — skipping
+  debug:
+    msg: "Notepad++ already installed"
+  when: np_installed.stat.exists
 
-  tasks:
+- name: Ensure installer directory exists
+  win_file:
+    path: "{{ installer_folder }}"
+    state: directory
+  when: not np_installed.stat.exists
 
-    - name: Check Notepad++ install
-      win_stat:
-        path: "{{ exe_install_path }}"
-      register: np_stat
+- name: Download Notepad++ installer from GitHub Release
+  win_get_url:
+    url: "{{ installer_url }}"
+    dest: "{{ installer_dest }}"
+    force: true
+  when: not np_installed.stat.exists
 
-    - debug:
-        msg: "Notepad++ already installed — skipping"
-      when: np_stat.stat.exists
+- name: Install Notepad++ silently
+  win_command: '"{{ installer_dest }}" /S'
+  when: not np_installed.stat.exists
 
-    - name: Ensure folder exists
-      win_file:
-        path: "C:\\Ansible\\Installers"
-        state: directory
-      when: not np_stat.stat.exists
-
-    - name: Check if installer exists
-      win_stat:
-        path: "{{ exe_dest }}"
-      register: np_installer_present
-      when: not np_stat.stat.exists
-
-    - name: Copy installer
-      win_copy:
-        src: "{{ exe_src }}"
-        dest: "{{ exe_dest }}"
-      when:
-        - not np_stat.stat.exists
-        - not np_installer_present.stat.exists
-
-    - name: Run silent install
-      win_command: '"{{ exe_dest }}" /S'
-      when: not np_stat.stat.exists
-
-    - name: Success message
-      debug:
-        msg: "Notepad++ installed successfully!"
-      when: not np_stat.stat.exists
+- name: Installation successful
+  debug:
+    msg: "Notepad++ installed successfully!"
+  when: not np_installed.stat.exists
