@@ -23,7 +23,7 @@
   when: not code_installed.stat.exists
 
 - name: Install VS Code silently
-  win_command: '"{{ installer_dest }}" /VERYSILENT /MERGETASKS=!runCode'
+  win_command: '"{{ installer_dest }}" /VERYSILENT'
   when: not code_installed.stat.exists
 
 - name: Installation successful
