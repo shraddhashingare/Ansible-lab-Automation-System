@@ -4,6 +4,9 @@
     path: "{{ app_exe_path }}"
   register: code_installed
 
+- debug:
+    msg: "VS Code exists? => {{ code_installed.stat.exists }}"
+
 - name: VS Code already installed — skipping
   debug:
     msg: "VS Code already installed"
